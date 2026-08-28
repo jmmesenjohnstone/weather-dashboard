@@ -2,7 +2,10 @@ name: Update Weather Forecast
 
 on:
   schedule:
-    - cron: "0 * * * *"
+    # Runs once every morning at 6:00 AM UTC
+    # This is 1:00 AM Central Standard Time
+    - cron: "0 6 * * *"
+
   workflow_dispatch:
 
 permissions:
@@ -13,20 +16,46 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
+      # =====================================================
+      # CHECK OUT REPOSITORY
+      # =====================================================
+
       - name: Check out repository
         uses: actions/checkout@v4
+
+
+      # =====================================================
+      # GET WEATHER FORECAST
+      # =====================================================
 
       - name: Get weather forecast
         env:
           VC_API_KEY: ${{ secrets.VC_API_KEY }}
+
         run: |
-          curl -L "https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/63045?unitGroup=us&include=days&elements=datetime,tempmax,tempmin,precipprob,conditions,icon&key=${VC_API_KEY}&contentType=json" \
+          curl -fL \
+            "https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/63045?unitGroup=us&include=days&elements=datetime,tempmax,tempmin,precipprob,conditions,icon&key=${VC_API_KEY}&contentType=json" \
             -o forecast.json
+
+
+      # =====================================================
+      # COMMIT UPDATED FORECAST
+      # =====================================================
 
       - name: Commit updated forecast
         run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
+
+          git config user.name \
+            "GitHub Actions"
+
+          git config user.email \
+            "actions@github.com"
+
           git add forecast.json
-          git diff --cached --quiet || git commit -m "Update weather forecast"
+
+          git diff --cached --quiet || \
+            git commit \
+            -m "Update weather forecast"
+
           git push
