@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>63045 Weather Forecast</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: #ffffff;
+        color: #243447;
+    }
+
+    .weather-card {
+        width: 100%;
+        padding: 18px 20px 14px;
+    }
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 14px;
+    }
+
+    .title {
+        font-size: 21px;
+        font-weight: 700;
+        color: #1f4e79;
+    }
+
+    .subtitle {
+        font-size: 12px;
+        color: #667788;
+        margin-top: 3px;
+    }
+
+    .updated {
+        font-size: 10px;
+        color: #8a969f;
+        text-align: right;
+    }
+
+    .forecast {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 6px;
+    }
+
+    .day {
+        text-align: center;
+        background: #f5f8fa;
+        border-radius: 7px;
+        padding: 10px 4px;
+        min-width: 0;
+    }
+
+    .day-name {
+        font-size: 12px;
+        font-weight: 700;
+        color: #34495e;
+    }
+
+    .date {
+        font-size: 10px;
+        color: #8493a0;
+        margin-top: 2px;
+    }
+
+    .icon {
+        font-size: 28px;
+        line-height: 38px;
+        margin: 5px 0;
+    }
+
+    .high {
+        font-size: 17px;
+        font-weight: 700;
+        color: #d35400;
+    }
+
+    .low {
+        font-size: 13px;
+        color: #52758a;
+        margin-top: 2px;
+    }
+
+    .rain {
+        font-size: 11px;
+        color: #2878a8;
+        margin-top: 7px;
+    }
+
+    .condition {
+        font-size: 9px;
+        color: #687985;
+        margin-top: 5px;
+        min-height: 22px;
+    }
+
+    .error {
+        padding: 25px;
+        text-align: center;
+        color: #b03a2e;
+        font-size: 14px;
+    }
+
+    @media (max-width: 650px) {
+        .weather-card {
+            padding: 10px;
+        }
+
+        .forecast {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .day:nth-child(n+5) {
+            margin-top: 4px;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="weather-card">
+
+    <div class="header">
+        <div>
+            <div class="title">7-DAY WEATHER FORECAST</div>
+            <div class="subtitle">Earth City, MO 63045</div>
+        </div>
+
+        <div class="updated" id="updated">
+            Loading...
+        </div>
+    </div>
+
+    <div class="forecast" id="forecast">
+        <div class="error">Loading forecast...</div>
+    </div>
+
+</div>
+
+<script>
+
+function weatherIcon(code) {
+    if (code === 0) return "☀️";
+    if (code === 1) return "🌤️";
+    if (code === 2) return "⛅";
+    if (code === 3) return "☁️";
+
+    if ([45, 48].includes(code)) return "🌫️";
+
+    if ([51, 53, 55, 56, 57].includes(code)) return "🌦️";
+
+    if ([61, 63, 65, 66, 67].includes(code)) return "🌧️";
+
+    if ([71, 73, 75, 77].includes(code)) return "🌨️";
+
+    if ([80, 81, 82].includes(code)) return "🌦️";
+
+    if ([85, 86].includes(code)) return "🌨️";
+
+    if ([95, 96, 99].includes(code)) return "⛈️";
+
+    return "🌤️";
+}
+
+
+function weatherDescription(code) {
+    if (code === 0) return "Clear";
+    if (code === 1) return "Mostly clear";
+    if (code === 2) return "Partly cloudy";
+    if (code === 3) return "Cloudy";
+
+    if ([45, 48].includes(code)) return "Fog";
+
+    if ([51, 53, 55].includes(code)) return "Drizzle";
+
+    if ([56, 57].includes(code)) return "Freezing drizzle";
+
+    if ([61, 63, 65].includes(code)) return "Rain";
+
+    if ([66, 67].includes(code)) return "Freezing rain";
+
+    if ([71, 73, 75, 77].includes(code)) return "Snow";
+
+    if ([80, 81, 82].includes(code)) return "Rain showers";
+
+    if ([85, 86].includes(code)) return "Snow showers";
+
+    if ([95, 96, 99].includes(code)) return "Thunderstorms";
+
+    return "Forecast";
+}
+
+
+function formatDay(dateString, index) {
+
+    const date = new Date(dateString + "T12:00:00");
+
+    if (index === 0) return "TODAY";
+
+    return date.toLocaleDateString("en-US", {
+        weekday: "short"
+    });
+}
+
+
+function formatDate(dateString) {
+
+    const date = new Date(dateString + "T12:00:00");
+
+    return date.toLocaleDateString("en-US", {
+        month: "numeric",
+        day: "numeric"
+    });
+}
+
+
+async function loadForecast() {
+
+    try {
+
+        const response = await fetch("forecast.json?t=" + Date.now());
+
+        if (!response.ok) {
+            throw new Error("Forecast data not available");
+        }
+
+        const data = await response.json();
+
+        const forecast = document.getElementById("forecast");
+
+        forecast.innerHTML = "";
+
+        for (let i = 0; i < data.time.length; i++) {
+
+            const day = document.createElement("div");
+
+            day.className = "day";
+
+            day.innerHTML = `
+                <div class="day-name">${formatDay(data.time[i], i)}</div>
+                <div class="date">${formatDate(data.time[i])}</div>
+
+                <div class="icon">
+                    ${weatherIcon(data.weather_code[i])}
+                </div>
+
+                <div class="high">
+                    ${Math.round(data.temperature_2m_max[i])}°
+                </div>
+
+                <div class="low">
+                    ${Math.round(data.temperature_2m_min[i])}°
+                </div>
+
+                <div class="rain">
+                    💧 ${data.precipitation_probability_max[i]}%
+                </div>
+
+                <div class="condition">
+                    ${weatherDescription(data.weather_code[i])}
+                </div>
+            `;
+
+            forecast.appendChild(day);
+        }
+
+        const updated = document.getElementById("updated");
+
+        updated.textContent =
+            "Updated " +
+            new Date().toLocaleTimeString("en-US", {
+                hour: "numeric",
+                minute: "2-digit"
+            });
+
+    }
+
+    catch (error) {
+
+        document.getElementById("forecast").innerHTML =
+            `<div class="error">
+                Forecast temporarily unavailable
+            </div>`;
+
+        console.error(error);
+    }
+}
+
+
+loadForecast();
+
+</script>
+
+</body>
+</html>
