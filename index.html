@@ -6,125 +6,114 @@
 <title>63045 Weather Forecast</title>
 
 <style>
-    * {
-        box-sizing: border-box;
-    }
+* {
+    box-sizing: border-box;
+}
 
-    body {
-        margin: 0;
-        padding: 0;
-        font-family: Arial, Helvetica, sans-serif;
-        background: #ffffff;
-        color: #243447;
-    }
+body {
+    margin: 0;
+    background: #ffffff;
+    color: #243447;
+    font-family: Arial, Helvetica, sans-serif;
+}
 
-    .weather-card {
-        width: 100%;
-        padding: 18px 20px 14px;
-    }
+.weather-card {
+    width: 100%;
+    padding: 16px 18px;
+}
 
-    .header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 14px;
-    }
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
 
-    .title {
-        font-size: 21px;
-        font-weight: 700;
-        color: #1f4e79;
-    }
+.title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1f4e79;
+}
 
-    .subtitle {
-        font-size: 12px;
-        color: #667788;
-        margin-top: 3px;
-    }
+.subtitle {
+    font-size: 12px;
+    color: #667788;
+    margin-top: 3px;
+}
 
-    .updated {
-        font-size: 10px;
-        color: #8a969f;
-        text-align: right;
-    }
+.updated {
+    font-size: 10px;
+    color: #8a969f;
+    text-align: right;
+}
 
+.forecast {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+}
+
+.day {
+    text-align: center;
+    background: #f5f8fa;
+    border-radius: 7px;
+    padding: 9px 4px;
+}
+
+.day-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: #34495e;
+}
+
+.date {
+    font-size: 10px;
+    color: #8493a0;
+    margin-top: 2px;
+}
+
+.icon {
+    font-size: 27px;
+    line-height: 36px;
+    margin: 4px 0;
+}
+
+.high {
+    font-size: 17px;
+    font-weight: 700;
+    color: #d35400;
+}
+
+.low {
+    font-size: 13px;
+    color: #52758a;
+    margin-top: 2px;
+}
+
+.rain {
+    font-size: 11px;
+    color: #2878a8;
+    margin-top: 6px;
+}
+
+.condition {
+    font-size: 9px;
+    color: #687985;
+    margin-top: 4px;
+    min-height: 22px;
+}
+
+.error {
+    padding: 25px;
+    text-align: center;
+    color: #b03a2e;
+}
+
+@media (max-width: 650px) {
     .forecast {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        gap: 6px;
+        grid-template-columns: repeat(4, 1fr);
     }
-
-    .day {
-        text-align: center;
-        background: #f5f8fa;
-        border-radius: 7px;
-        padding: 10px 4px;
-        min-width: 0;
-    }
-
-    .day-name {
-        font-size: 12px;
-        font-weight: 700;
-        color: #34495e;
-    }
-
-    .date {
-        font-size: 10px;
-        color: #8493a0;
-        margin-top: 2px;
-    }
-
-    .icon {
-        font-size: 28px;
-        line-height: 38px;
-        margin: 5px 0;
-    }
-
-    .high {
-        font-size: 17px;
-        font-weight: 700;
-        color: #d35400;
-    }
-
-    .low {
-        font-size: 13px;
-        color: #52758a;
-        margin-top: 2px;
-    }
-
-    .rain {
-        font-size: 11px;
-        color: #2878a8;
-        margin-top: 7px;
-    }
-
-    .condition {
-        font-size: 9px;
-        color: #687985;
-        margin-top: 5px;
-        min-height: 22px;
-    }
-
-    .error {
-        padding: 25px;
-        text-align: center;
-        color: #b03a2e;
-        font-size: 14px;
-    }
-
-    @media (max-width: 650px) {
-        .weather-card {
-            padding: 10px;
-        }
-
-        .forecast {
-            grid-template-columns: repeat(4, 1fr);
-        }
-
-        .day:nth-child(n+5) {
-            margin-top: 4px;
-        }
-    }
+}
 </style>
 </head>
 
@@ -144,62 +133,35 @@
     </div>
 
     <div class="forecast" id="forecast">
-        <div class="error">Loading forecast...</div>
+        <div>Loading forecast...</div>
     </div>
 
 </div>
 
 <script>
 
-function weatherIcon(code) {
-    if (code === 0) return "☀️";
-    if (code === 1) return "🌤️";
-    if (code === 2) return "⛅";
-    if (code === 3) return "☁️";
+function weatherIcon(icon) {
 
-    if ([45, 48].includes(code)) return "🌫️";
+    const icons = {
+        "clear-day": "☀️",
+        "clear-night": "🌙",
+        "partly-cloudy-day": "🌤️",
+        "partly-cloudy-night": "🌙",
+        "cloudy": "☁️",
+        "rain": "🌧️",
+        "showers-day": "🌦️",
+        "showers-night": "🌧️",
+        "thunder-rain": "⛈️",
+        "thunder-showers-day": "⛈️",
+        "thunder-showers-night": "⛈️",
+        "snow": "❄️",
+        "snow-showers-day": "🌨️",
+        "snow-showers-night": "🌨️",
+        "fog": "🌫️",
+        "wind": "💨"
+    };
 
-    if ([51, 53, 55, 56, 57].includes(code)) return "🌦️";
-
-    if ([61, 63, 65, 66, 67].includes(code)) return "🌧️";
-
-    if ([71, 73, 75, 77].includes(code)) return "🌨️";
-
-    if ([80, 81, 82].includes(code)) return "🌦️";
-
-    if ([85, 86].includes(code)) return "🌨️";
-
-    if ([95, 96, 99].includes(code)) return "⛈️";
-
-    return "🌤️";
-}
-
-
-function weatherDescription(code) {
-    if (code === 0) return "Clear";
-    if (code === 1) return "Mostly clear";
-    if (code === 2) return "Partly cloudy";
-    if (code === 3) return "Cloudy";
-
-    if ([45, 48].includes(code)) return "Fog";
-
-    if ([51, 53, 55].includes(code)) return "Drizzle";
-
-    if ([56, 57].includes(code)) return "Freezing drizzle";
-
-    if ([61, 63, 65].includes(code)) return "Rain";
-
-    if ([66, 67].includes(code)) return "Freezing rain";
-
-    if ([71, 73, 75, 77].includes(code)) return "Snow";
-
-    if ([80, 81, 82].includes(code)) return "Rain showers";
-
-    if ([85, 86].includes(code)) return "Snow showers";
-
-    if ([95, 96, 99].includes(code)) return "Thunderstorms";
-
-    return "Forecast";
+    return icons[icon] || "🌤️";
 }
 
 
@@ -207,7 +169,9 @@ function formatDay(dateString, index) {
 
     const date = new Date(dateString + "T12:00:00");
 
-    if (index === 0) return "TODAY";
+    if (index === 0) {
+        return "TODAY";
+    }
 
     return date.toLocaleDateString("en-US", {
         weekday: "short"
@@ -233,52 +197,77 @@ async function loadForecast() {
         const response = await fetch("forecast.json?t=" + Date.now());
 
         if (!response.ok) {
-            throw new Error("Forecast data not available");
+            throw new Error("Could not load forecast.json");
         }
 
         const data = await response.json();
+
+        if (!data.days || data.days.length === 0) {
+            throw new Error("No forecast data found");
+        }
 
         const forecast = document.getElementById("forecast");
 
         forecast.innerHTML = "";
 
-        for (let i = 0; i < data.time.length; i++) {
+        const days = data.days.slice(0, 7);
 
-            const day = document.createElement("div");
+        days.forEach((day, index) => {
 
-            day.className = "day";
+            const card = document.createElement("div");
 
-            day.innerHTML = `
-                <div class="day-name">${formatDay(data.time[i], i)}</div>
-                <div class="date">${formatDate(data.time[i])}</div>
+            card.className = "day";
+
+            const high =
+                day.tempmax !== undefined
+                    ? Math.round(day.tempmax)
+                    : "--";
+
+            const low =
+                day.tempmin !== undefined
+                    ? Math.round(day.tempmin)
+                    : "--";
+
+            const rain =
+                day.precipprob !== undefined
+                    ? Math.round(day.precipprob)
+                    : "--";
+
+            card.innerHTML = `
+                <div class="day-name">
+                    ${formatDay(day.datetime, index)}
+                </div>
+
+                <div class="date">
+                    ${formatDate(day.datetime)}
+                </div>
 
                 <div class="icon">
-                    ${weatherIcon(data.weather_code[i])}
+                    ${weatherIcon(day.icon)}
                 </div>
 
                 <div class="high">
-                    ${Math.round(data.temperature_2m_max[i])}°
+                    ${high}°
                 </div>
 
                 <div class="low">
-                    ${Math.round(data.temperature_2m_min[i])}°
+                    ${low}°
                 </div>
 
                 <div class="rain">
-                    💧 ${data.precipitation_probability_max[i]}%
+                    💧 ${rain}%
                 </div>
 
                 <div class="condition">
-                    ${weatherDescription(data.weather_code[i])}
+                    ${day.conditions || ""}
                 </div>
             `;
 
-            forecast.appendChild(day);
-        }
+            forecast.appendChild(card);
 
-        const updated = document.getElementById("updated");
+        });
 
-        updated.textContent =
+        document.getElementById("updated").textContent =
             "Updated " +
             new Date().toLocaleTimeString("en-US", {
                 hour: "numeric",
