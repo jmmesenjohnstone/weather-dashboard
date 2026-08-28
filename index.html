@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>63045 Weather Forecast</title>
 
 <style>
@@ -19,55 +20,93 @@ body {
 
 .weather-card {
     width: 100%;
-    padding: 16px 18px;
+    padding: 14px 16px;
 }
+
+/* ---------- HEADER ---------- */
 
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
+    margin-bottom: 11px;
 }
 
 .title {
-    font-size: 20px;
+    font-size: 19px;
     font-weight: 700;
     color: #1f4e79;
+    letter-spacing: .2px;
 }
 
 .subtitle {
-    font-size: 12px;
-    color: #667788;
+    font-size: 11px;
+    color: #71808c;
     margin-top: 3px;
 }
 
 .updated {
-    font-size: 10px;
-    color: #8a969f;
+    font-size: 9px;
+    color: #9aa5ad;
     text-align: right;
 }
 
+/* ---------- FORECAST ---------- */
+
 .forecast {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: 1.25fr repeat(6, 1fr);
     gap: 6px;
 }
 
 .day {
     text-align: center;
-    background: #f5f8fa;
+    background: #f4f7f9;
     border-radius: 7px;
-    padding: 9px 4px;
+    padding: 8px 3px;
+    min-width: 0;
+    border: 1px solid #edf1f3;
 }
 
+/* ---------- TODAY ---------- */
+
+.day.today {
+    background: linear-gradient(145deg, #1f6fae, #2f87c5);
+    color: white;
+    border: none;
+    box-shadow: 0 2px 5px rgba(31, 78, 121, .25);
+}
+
+.day.today .day-name,
+.day.today .date,
+.day.today .low,
+.day.today .condition {
+    color: rgba(255,255,255,.88);
+}
+
+.day.today .high {
+    color: #ffffff;
+}
+
+.day.today .rain {
+    color: #e4f5ff;
+}
+
+.day.today .icon {
+    font-size: 34px;
+    line-height: 40px;
+}
+
+/* ---------- TEXT ---------- */
+
 .day-name {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
     color: #34495e;
 }
 
 .date {
-    font-size: 10px;
+    font-size: 9px;
     color: #8493a0;
     margin-top: 2px;
 }
@@ -75,7 +114,7 @@ body {
 .icon {
     font-size: 27px;
     line-height: 36px;
-    margin: 4px 0;
+    margin: 3px 0;
 }
 
 .high {
@@ -85,33 +124,56 @@ body {
 }
 
 .low {
-    font-size: 13px;
+    font-size: 12px;
     color: #52758a;
-    margin-top: 2px;
+    margin-top: 1px;
 }
 
 .rain {
-    font-size: 11px;
+    font-size: 10px;
     color: #2878a8;
-    margin-top: 6px;
+    margin-top: 5px;
+    font-weight: 600;
 }
 
 .condition {
-    font-size: 9px;
+    font-size: 8px;
     color: #687985;
-    margin-top: 4px;
-    min-height: 22px;
+    margin-top: 3px;
+    min-height: 20px;
 }
 
-.error {
-    padding: 25px;
-    text-align: center;
-    color: #b03a2e;
-}
+/* ---------- SMALL SCREENS ---------- */
 
-@media (max-width: 650px) {
+@media (max-width: 700px) {
+
+    .weather-card {
+        padding: 10px;
+    }
+
+    .title {
+        font-size: 16px;
+    }
+
     .forecast {
         grid-template-columns: repeat(4, 1fr);
+    }
+
+    .day.today {
+        grid-column: span 1;
+    }
+}
+
+/* ---------- VERY SMALL ---------- */
+
+@media (max-width: 450px) {
+
+    .forecast {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .updated {
+        display: none;
     }
 }
 </style>
@@ -122,42 +184,63 @@ body {
 <div class="weather-card">
 
     <div class="header">
+
         <div>
-            <div class="title">7-DAY WEATHER FORECAST</div>
-            <div class="subtitle">Earth City, MO 63045</div>
+            <div class="title">
+                7-DAY WEATHER FORECAST
+            </div>
+
+            <div class="subtitle">
+                Earth City, MO 63045
+            </div>
         </div>
 
         <div class="updated" id="updated">
             Loading...
         </div>
+
     </div>
 
     <div class="forecast" id="forecast">
-        <div>Loading forecast...</div>
+
+        <div class="day">
+            Loading forecast...
+        </div>
+
     </div>
 
 </div>
+
 
 <script>
 
 function weatherIcon(icon) {
 
     const icons = {
+
         "clear-day": "☀️",
         "clear-night": "🌙",
+
         "partly-cloudy-day": "🌤️",
         "partly-cloudy-night": "🌙",
+
         "cloudy": "☁️",
+
         "rain": "🌧️",
+
         "showers-day": "🌦️",
         "showers-night": "🌧️",
+
         "thunder-rain": "⛈️",
         "thunder-showers-day": "⛈️",
         "thunder-showers-night": "⛈️",
+
         "snow": "❄️",
         "snow-showers-day": "🌨️",
         "snow-showers-night": "🌨️",
+
         "fog": "🌫️",
+
         "wind": "💨"
     };
 
@@ -194,19 +277,21 @@ async function loadForecast() {
 
     try {
 
-        const response = await fetch("forecast.json?t=" + Date.now());
+        const response =
+            await fetch("forecast.json?t=" + Date.now());
 
         if (!response.ok) {
-            throw new Error("Could not load forecast.json");
+            throw new Error("Could not load forecast");
         }
 
         const data = await response.json();
 
         if (!data.days || data.days.length === 0) {
-            throw new Error("No forecast data found");
+            throw new Error("No forecast data");
         }
 
-        const forecast = document.getElementById("forecast");
+        const forecast =
+            document.getElementById("forecast");
 
         forecast.innerHTML = "";
 
@@ -214,9 +299,11 @@ async function loadForecast() {
 
         days.forEach((day, index) => {
 
-            const card = document.createElement("div");
+            const card =
+                document.createElement("div");
 
-            card.className = "day";
+            card.className =
+                "day" + (index === 0 ? " today" : "");
 
             const high =
                 day.tempmax !== undefined
@@ -234,6 +321,7 @@ async function loadForecast() {
                     : "--";
 
             card.innerHTML = `
+
                 <div class="day-name">
                     ${formatDay(day.datetime, index)}
                 </div>
@@ -261,11 +349,13 @@ async function loadForecast() {
                 <div class="condition">
                     ${day.conditions || ""}
                 </div>
+
             `;
 
             forecast.appendChild(card);
 
         });
+
 
         document.getElementById("updated").textContent =
             "Updated " +
@@ -279,7 +369,8 @@ async function loadForecast() {
     catch (error) {
 
         document.getElementById("forecast").innerHTML =
-            `<div class="error">
+
+            `<div class="day">
                 Forecast temporarily unavailable
             </div>`;
 
